@@ -1,0 +1,92 @@
+rm(list=ls(all=TRUE))
+
+## load libraries
+
+library(caret)
+library(caTools)
+library(randomForest)
+library(e1071)
+library(glmnet)
+library(rpart)
+library(rpart.plot)
+library(ggplot2)
+library(wordcloud)
+library(tm)
+library(SnowballC)
+library(ROCR)
+library(pROC)
+library(RColorBrewer)
+library(dplyr)
+library(tidytext)
+library(C50)
+
+## set working directory
+setwd("c:/Data/")    
+
+## input
+
+spamTr <- read.table (file="Spam-Training.txt",header = T)
+spamTe <- read.table (file="Spam-Test.txt",header = T)
+
+str(spamTr)
+head(spamTr)
+summary(spamTr)
+mod1 <- lm(spam ~ ., data = spamTr)
+summary(mod1)
+
+spamTr$pct_all <- NULL
+spamTr$pct_mail <- NULL
+spamTr$pct_receive <- NULL
+spamTr$pct_people <- NULL
+spamTr$pct_report <- NULL
+spamTr$pct_addresses <- NULL
+spamTr$pct_hpl <- NULL
+spamTr$pct_650 <- NULL
+spamTr$pct_lab <- NULL
+spamTr$pct_telnet <- NULL
+spamTr$pct_857 <- NULL
+spamTr$pct_415 <- NULL
+spamTr$pct_85 <- NULL
+spamTr$pct_technology <- NULL
+spamTr$pct_parts <- NULL
+spamTr$pct_pm <- NULL
+spamTr$pct_direct <- NULL
+spamTr$pct_cs <- NULL
+spamTr$pct_original <- NULL
+spamTr$pct_parenthesis <- NULL
+spamTr$pct_bracket <- NULL
+spamTr$pct_hash <- NULL
+spamTr$crl_average <- NULL
+spamTr$crl_longest <- NULL
+mod1 <- lm(spam ~ ., data = spamTr)
+summary(mod1)
+
+levels(as.factor(spamTr$spam))
+spamTr$spam[spamTr$spam == "0"] <- "non-spam"
+spamTr$spam[spamTr$spam == "1"] <- "spam"
+spamTr$spam <- factor(spamTr$spam)
+
+
+
+###########################################################
+X <- spamTr[,-34]  
+y <- spamTr[,34]
+# Creazione training set e test set 80:20
+trainX <- X[1:3680,]
+trainy <- y[1:3680]
+# Realizzo il modello
+set.seed(22)
+model <- C5.0(trainX, trainy)
+summary(model)
+plot(model)
+
+# Aggiungo una matrice di costi per penalizzare l'erronea classificazione 
+
+cost_matrix<-matrix(c(0,10,0,0),2,2,byrow=TRUE)
+cost_matrix
+rownames(cost_matrix)<-levels(spamTr[,1])
+colnames(cost_matrix)<-levels(spamTr[,1])
+
+model.1<-C5.0(trainX,trainy,costs=cost_matrix)
+summary(model.1)
+plot(model.1)
